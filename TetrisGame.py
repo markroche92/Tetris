@@ -1,15 +1,15 @@
 import copy
 import time
+import math
 import curses
 from DisplayArea import DisplayType
 from ObstacleGroup import ObstacleGroup
 from TetrisPiece import TetrisPiece
 import numpy as np
 
-
 class TetrisGame:
     # Max game level
-    MAX_LEVEL =  100
+    MAX_LEVEL =  1000
     MAX_SCORE = MAX_LEVEL * 100
 
     def __init__(self):
@@ -47,8 +47,8 @@ class TetrisGame:
         if self.nextPiece:
         	self.currentPiece = copy.deepcopy(self.nextPiece)
         else:
-        	self.currentPiece = TetrisPiece()
-        self.nextPiece = TetrisPiece()
+        	self.currentPiece = TetrisPiece(groupCombined = self.level >= 4)
+        self.nextPiece = TetrisPiece(groupCombined = self.level >= 4)
 
     # Update the position of the current piece under player control
     def gravity(self):
@@ -82,7 +82,10 @@ class TetrisGame:
         curTime = timeInit
         cnt = 0
 
-        timeAllowedForMove = max(0.1, 0.2 - (self.level / 10) * 0.1)
+        if self.level <= 10:
+            timeAllowedForMove = max(0.1, 0.5 - math.floor(self.level / 2) / 4 * 0.1)
+        else:
+            timeAllowedForMove = max(0.05, 0.1 - 0.05 * (self.level - 10) / 20)
 
         # Allow user inputs for a certain period of timeMax
         while(curTime - timeInit < timeAllowedForMove):
@@ -213,15 +216,18 @@ class TetrisGame:
     # Remove any rows which are now complete
     def removeRows(self):
         doRemove = False
+        countRowsRemoved = sum([1 if self.obstacleGroup.checkRow(idx) else 0 for idx, row in enumerate(self.obstacleGroup.value)])
+        bonus = countRowsRemoved * countRowsRemoved * 100
         for idxRow in range(self.displayArea.numberRowsTetris):
-        	if self.obstacleGroup.checkRow(idxRow):
-        		doRemove = True
-        		self.obstacleGroup.removeRow(idxRow)
-        		self.score = self.score + 100
-        		self.displayArea.updateDisplay(self.score, DisplayType.SCORE)
-        		if (self.score % 1000 == 0 and self.score != 0 and
-        		   self.level < self.MAX_LEVEL):
-        			# Increment the level each time the scoroe
-        			self.level = self.level + 1
-        			self.displayArea.updateDisplay(self.level, DisplayType.LEVEL)
-        if doRemove: self.displayArea.renderObstaclesOnScreen()
+            if self.obstacleGroup.checkRow(idxRow):
+                doRemove = True
+                self.obstacleGroup.removeRow(idxRow)
+                self.score = self.score + math.floor(bonus / countRowsRemoved)
+                self.displayArea.updateDisplay(self.score, DisplayType.SCORE)
+                if (self.score != 0 and self.level < self.MAX_LEVEL):
+                    # Increment the level each time the scoroe
+                    levelPrev = copy.deepcopy(self.level)
+                    self.level = math.floor(self.score / 1000)
+
+                    if levelPrev != self.level: self.displayArea.updateDisplay(self.level, DisplayType.LEVEL)
+                if doRemove: self.displayArea.renderObstaclesOnScreen()

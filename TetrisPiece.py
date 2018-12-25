@@ -9,8 +9,7 @@ class TetrisPiece:
 	###################################################################
 
 	# List of pieces from: https://en.wikipedia.org/wiki/Tetris
-
-	pieceList = {'I' : np.array([[0, 0, 0, 0],
+	tetraminos = {'I' : np.array([[0, 0, 0, 0],
 								[1, 1, 1, 1],
 								[0, 0, 0, 0],
 								[0, 0, 0, 0]]),
@@ -37,6 +36,44 @@ class TetrisPiece:
 								[0, 1, 0, 0],
 								[0, 0, 0, 0]])}
 
+	# Pentaminos: https://www.google.com/search?q=five+block+tetris+pieces%5D&tbm=isch&source=iu&ictx=1&fir=_qutxsXCltkBdM%253A%252CsVrnaNJQbyTqRM%252C_&usg=AI4_-kRwBF_ktMhFZVUXDQDUwDip4m38VQ&sa=X&ved=2ahUKEwjHzb_4trnfAhWtRxUIHWP5ARUQ9QEwC3oECAEQCA#imgrc=BzsmtcMA9QUWiM:
+	pentaminos = {'I2' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[0, 1, 0, 0],
+								[0, 0, 0, 0]]),
+				'I3' : np.array([[0, 1, 0, 0],
+								[1, 1, 1, 1],
+								[0, 0, 0, 0],
+								[0, 0, 0, 0]]),
+				'J2' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[0, 0, 0, 1],
+								[0, 0, 0, 0]]),
+				'L2' : np.array([[0, 0, 0, 0],
+								[0, 0, 0, 1],
+								[1, 1, 1, 1],
+								[0, 0, 0, 0]]),
+				'Q' : np.array([[0, 1, 1, 0],
+								[0, 1, 1, 0],
+								[0, 0, 1, 0],
+								[0, 0, 0, 0]]),
+				'P' : np.array([[0, 1, 1, 0],
+								[0, 1, 1, 0],
+								[0, 1, 0, 0],
+								[0, 0, 0, 0]]),
+				'C' : np.array([[0, 1, 1, 0],
+								[0, 1, 0, 0],
+								[0, 1, 1, 0],
+								[0, 0, 0, 0]]),
+				'S2' : np.array([[0, 0, 0, 0],
+								[0, 1, 1, 1],
+								[1, 1, 0, 0],
+								[0, 0, 0, 0]]),
+				'Z2' : np.array([[0, 0, 0, 0],
+								[1, 1, 0, 0],
+								[0, 1, 1, 1],
+								[0, 0, 0, 0]])}
+
 	# Block Colors for the game
 	pieceColours  = ['red',
 				'green2',
@@ -49,10 +86,15 @@ class TetrisPiece:
 				'gray42',
 				'brown']
 
-	def __init__(self, pieceValue = None,
+	def __init__(self, groupCombined = None, pieceValue = None,
 	             piecePosition = None,
 				 pieceColour = None,
 				 pieceName = None):
+
+		if not groupCombined:
+			self.pieceList = self.tetraminos
+		else:
+			self.pieceList = {**self.tetraminos, **self.pentaminos}
 
 		if pieceValue is not None:
 			self.value = pieceValue
