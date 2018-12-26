@@ -4,8 +4,10 @@ import math
 import curses
 from DisplayArea import DisplayType
 from ObstacleGroup import ObstacleGroup
-from TetrisPiece import TetrisPiece
+from TetrisPiece import TetrisPiece, PieceSet
 import numpy as np
+
+
 
 class TetrisGame:
     # Max game level
@@ -43,12 +45,19 @@ class TetrisGame:
     # Generate a random block of random color
     def spawnBlock(self):
 
+        if(self.level < 3):
+            pieceSet = PieceSet.TETRAMINO
+        elif(self.level >= 3 and self.level <= 5):
+            pieceSet = PieceSet.QUADRAMINO
+        else:
+            pieceSet = PieceSet.SEXTAMINO
+
         # Choose a block from dictionary
         if self.nextPiece:
         	self.currentPiece = copy.deepcopy(self.nextPiece)
         else:
-        	self.currentPiece = TetrisPiece(groupCombined = self.level >= 4)
-        self.nextPiece = TetrisPiece(groupCombined = self.level >= 4)
+        	self.currentPiece = TetrisPiece(pieceSet = pieceSet)
+        self.nextPiece = TetrisPiece(pieceSet = pieceSet)
 
     # Update the position of the current piece under player control
     def gravity(self):

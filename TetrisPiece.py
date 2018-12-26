@@ -1,5 +1,11 @@
 import numpy as np
+from enum import Enum
 import random
+
+class PieceSet(Enum):
+    TETRAMINO = 1
+    QUADRAMINO = 2
+    SEXTAMINO = 3
 
 # Class for any generated current / next playing tetris piece
 class TetrisPiece:
@@ -74,27 +80,68 @@ class TetrisPiece:
 								[0, 1, 1, 1],
 								[0, 0, 0, 0]])}
 
-	# Block Colors for the game
-	pieceColours  = ['red',
-				'green2',
-				'orchid3',
-				'DodgerBlue2',
-				'turquoise1',
-				'yellow',
-				'orange',
-				'purple1',
-				'gray42',
-				'brown']
+	sextaminos = {'I4' : np.array([[0, 1, 1, 0],
+								[0, 1, 1, 0],
+								[0, 1, 1, 0],
+								[0, 0, 0, 0]]),
+				'G' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[1, 1, 0, 0],
+								[0, 0, 0, 0]]),
+				'D' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[0, 0, 1, 1],
+								[0, 0, 0, 0]]),
+				'U' : np.array([[0, 0, 0, 0],
+								[1, 0, 0, 1],
+								[1, 1, 1, 1],
+								[0, 0, 0, 0]]),
+				'PI' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[0, 1, 1, 0],
+								[0, 0, 0, 0]]),
+				'J3' : np.array([[0, 0, 0, 0],
+								[1, 1, 1, 1],
+								[0, 0, 0, 1],
+								[0, 0, 0, 1]]),
+				'L3' : np.array([[0, 0, 0, 1],
+								[0, 0, 0, 1],
+								[1, 1, 1, 1],
+								[0, 0, 0, 0]]),
+				'W' : np.array([[0, 0, 0, 0],
+								[0, 0, 0, 1],
+								[0, 1, 1, 1],
+								[1, 1, 0, 0]])}
 
-	def __init__(self, groupCombined = None, pieceValue = None,
+	# Block Colors for the game
+	turquoiseColours  = ['turquoise1', 'turquoise2', 'turquoise3', 'turquoise4']
+	goldenColours = ['goldenrod1', 'goldenrod2', 'goldenrod3', 'goldenrod4']
+	orchidColours = ['DarkOrchid1', 'DarkOrchid2', 'DarkOrchid3', 'DarkOrchid4']
+
+	colours = [turquoiseColours, goldenColours, orchidColours]
+	colourSets = [set(sublist) for sublist in colours]
+	allColours = list(set().union(*colourSets))
+
+	level2Set = [set(sublist) for sublist in colours[0:2]]
+	level2 = list(set().union(*level2Set))
+
+	def __init__(self, pieceSet = None, pieceValue = None,
 	             piecePosition = None,
 				 pieceColour = None,
 				 pieceName = None):
 
-		if not groupCombined:
+		if pieceSet == PieceSet.TETRAMINO:
 			self.pieceList = self.tetraminos
-		else:
+			self.pieceColours = self.turquoiseColours
+		elif pieceSet == PieceSet.QUADRAMINO:
 			self.pieceList = {**self.tetraminos, **self.pentaminos}
+			self.pieceColours = self.level2
+		elif pieceSet == PieceSet.SEXTAMINO:
+			self.pieceList = {**self.tetraminos, **self.pentaminos, **self.sextaminos}
+			self.pieceColours = self.allColours
+
+
+
 
 		if pieceValue is not None:
 			self.value = pieceValue

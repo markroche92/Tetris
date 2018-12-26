@@ -317,7 +317,7 @@ class DisplayArea:
 			idxRowBase = idxRowBase % self.numberRowsTetris
 			# speed = speedInit * math.sin(math.pi * (idxBase / 19))
 			time.sleep(speedInit)
-			for idxColor, color in enumerate(TetrisPiece.pieceColours):
+			for idxColor, color in enumerate(TetrisPiece.allColours):
 				# Don't allow the processed row index exceed 19
 				idxRowTilt = (idxRowBase + factorTilt * idxColor) % 20
 				# Don't allow the processed previous row index exceed 19
