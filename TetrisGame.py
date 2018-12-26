@@ -13,6 +13,8 @@ class TetrisGame:
     # Max game level
     MAX_LEVEL =  1000
     MAX_SCORE = MAX_LEVEL * 100
+    lowLevelThreshold = 3
+    midLevelThreshold = 6
 
     def __init__(self):
 
@@ -25,6 +27,7 @@ class TetrisGame:
         self.level = 1
         self.alive = True
         self.loading = True
+        self.restart = False
         self.currentPiece, self.nextPiece = None, None
         self.renderList = []
 
@@ -45,9 +48,10 @@ class TetrisGame:
     # Generate a random block of random color
     def spawnBlock(self):
 
-        if(self.level < 3):
+        if(self.level < self.lowLevelThreshold):
             pieceSet = PieceSet.TETRAMINO
-        elif(self.level >= 3 and self.level <= 5):
+        elif(self.level >= self.lowLevelThreshold and
+             self.level <= self.midLevelThreshold):
             pieceSet = PieceSet.QUADRAMINO
         else:
             pieceSet = PieceSet.SEXTAMINO

@@ -7,6 +7,36 @@ import random
 import time
 from TetrisPiece import TetrisPiece
 
+# Window placement, dimensions and properties
+def setRootProperties(root, windowHeight, windowWidth):
+	## Set window properties
+	# Window stays in front of other windows until closed
+	root.attributes("-topmost", True)
+	root.configure(background = 'black')
+	root.title('Tetris Application')
+
+	# Window is not resizeable in X or Y directions
+	# https://stackoverflow.com/questions/21958534/how-can-i-prevent-a-window-from-being-resized-with-tkinter
+	root.resizable(width=False, height=False)
+
+	## Set window position and dimensions
+	# Width and Height of the user's computer screen
+	# https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
+	screenWidth = root.winfo_screenwidth()
+	screenHeight = root.winfo_screenheight()
+
+	# Initial X and Y position of the window - centre the window in the screen
+	windowX = floor(screenWidth / 2) - floor(windowWidth / 2)
+	windowY = floor(screenHeight / 2) - floor(windowHeight / 2)
+
+	# Set window position and dimensions
+	root.geometry('{}x{}+{}+{}'.format(windowWidth,
+							            windowHeight,
+							            windowX,
+							            windowY))
+
+	return root
+
 class DisplayType(Enum):
 	SCORE = 0
 	LEVEL = 1
@@ -21,7 +51,7 @@ class DisplayArea:
 	tetrisHeight, tetrisWidth = 400, 200
 
 	# Button / Label height
-	labelFrameHeightLen = 40
+	labelFrameHeightLen = 20
 
 	## Number of rows and columns in the grid
 	numberRows, numberCols = 24, 24
@@ -35,8 +65,8 @@ class DisplayArea:
 	                                      int(tetrisWidth / gridWidth))
 
 	# Calculate the length allowed for the next block frame
-	nextBlockFrameHeightLen = (windowHeight - 3 * labelFrameHeightLen -
-						   	   gridWidth * 7)
+	nextBlockFrameHeightLen = (windowHeight - 4 * labelFrameHeightLen -
+						   	   gridWidth * 9)
 
 	# Width for the the right frame
 	rightFrameWidth = (windowWidth - tetrisWidth - 6 * gridWidth)
@@ -79,7 +109,7 @@ class DisplayArea:
 		nextPieceString.set(self.nextPieceStr)
 
 		# Window placement, dimensions etc.
-		self.setRootProperties()
+		self.root = setRootProperties(self.root, self.windowHeight, self.windowWidth)
 
 		self.mainFrame = Frame(self.root, height = self.windowHeight,
 		                       width = self.windowWidth, bg = 'white')
@@ -199,12 +229,23 @@ class DisplayArea:
 
 		# Start / Pause Button
 		# .place() command parameters: http://effbot.org/tkinterbook/place.htm
-		startFrame = Frame(rightFrame, bg = 'black', height = self.labelFrameHeightLen,
+		totH = self.labelFrameHeightLen * 2 + 2 * self.gridWidth
+		startFrame = Frame(rightFrame, bg = 'black', height = totH,
 						   width = self.windowWidth - self.tetrisWidth - 6 * self.gridWidth)
+
+		# Restart / Settings button
+		self.settingsRestartStr = StringVar()
+		self.settingsRestartStr.set('Settings')
+		self.restartButton = Button(startFrame, textvariable = self.settingsRestartStr, command = self.clickRestartButton)
+		self.restartButton.config(font=("Helvetica", 10))
+		self.restartButton.place(relx=0.5, rely=0.375, relwidth=1, relheight = self.labelFrameHeightLen/totH, anchor=CENTER)
+
+
 		self.startButton = Button(startFrame, text = "Start /Pause Game", command = self.clickStartButton)
 		self.startButton.config(font=("Helvetica", 10))
-		self.startButton.place(relx=0.5, rely=0.5, relwidth=1, relheight=1, anchor=CENTER)
-		startFrame.place(x = self.gridWidth, y = self.startFramePlaceY)
+		self.startButton.place(relx=0.5, rely=1-0.125, relwidth=1, relheight=self.labelFrameHeightLen/totH, anchor=CENTER)
+		#startFrame.place(x = self.gridWidth, y = self.startFramePlaceY)
+		startFrame.place(x = self.gridWidth, y = self.startFramePlaceY - 2 * self.gridWidth - 2 *self.labelFrameHeightLen)
 
     # Return numpy array of x and y co-ordinates corresponding to a grid from (0,0)
     # to specified limit
@@ -244,34 +285,6 @@ class DisplayArea:
 			# Flag exits the application running loop
 			self.alive = False
 			self.root.destroy()
-
-    # Window placement, dimensions and properties
-	def setRootProperties(self):
-		## Set window properties
-		# Window stays in front of other windows until closed
-		self.root.attributes("-topmost", True)
-		self.root.configure(background = 'black')
-		self.root.title('Tetris Application')
-
-		# Window is not resizeable in X or Y directions
-		# https://stackoverflow.com/questions/21958534/how-can-i-prevent-a-window-from-being-resized-with-tkinter
-		self.root.resizable(width=False, height=False)
-
-		## Set window position and dimensions
-		# Width and Height of the user's computer screen
-		# https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
-		screenWidth = self.root.winfo_screenwidth()
-		screenHeight = self.root.winfo_screenheight()
-
-		# Initial X and Y position of the window - centre the window in the screen
-		windowX = floor(screenWidth / 2) - floor(self.windowWidth / 2)
-		windowY = floor(screenHeight / 2) - floor(self.windowHeight / 2)
-
-		# Set window position and dimensions
-		self.root.geometry('{}x{}+{}+{}'.format(self.windowWidth,
-									            self.windowHeight,
-									            windowX,
-									            windowY))
 
 	# Color the grid cell in the specified location
 	def colorCell(self, xCoord, yCoord, color, canvas):
@@ -332,13 +345,20 @@ class DisplayArea:
 			elif idxRowBase % 10 >= 5:
 				self.startButton.config(bg='white')
 			# Update the display as long as the game hasn't been closed
-			if self.game.loading: self.root.update()
-
+			if self.game.loading: self.root.update(), print('update')
 		self.clearLoadingScreen()
 
 	# Dictate what happens when the start button is clicked
 	def clickStartButton(self):
 		self.game.loading = not self.game.loading
+		if self.game.loading:
+			self.settingsRestartStr.set('Settings')
+		else:
+			self.settingsRestartStr.set('Restart')
+
+	# Dictate what happens when the restart button is pressed
+	def clickRestartButton(self):
+		if not self.game.loading: self.game.restart = True
 
 	# Render empty screen
 	def renderEmptyScreen(self):
@@ -385,8 +405,6 @@ class DisplayArea:
 
 			self.mainNextBlockCanvas.create_text(self.gridWidth * 3, self.gridWidth * 2, fill = "white", text = "Next Piece:", font=("Helvetica", 10))
 
-
-
 	# Function to render the piece on the screen
 	def renderPieceOnScreen(self, fix):
 		# Reset the rendering of previous piece to black
@@ -408,8 +426,6 @@ class DisplayArea:
 					               self.game.currentPiece.colour, self.canvasTetris)
 		# Update the canvas each time the piece position changes
 		self.root.update()
-
-
 
 	# Render the fixed objects on the screen
 	def renderObstaclesOnScreen(self):

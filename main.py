@@ -5,34 +5,48 @@ from ObstacleGroup import ObstacleGroup
 from BorderedFrame import BorderedFrame
 from DisplayArea import DisplayArea
 from TetrisGame import TetrisGame
-import  numpy as np
+import numpy as np
 import curses
 import sys
 
+def startGame(root, window, prevDisplay = None):
+
+	Game = TetrisGame()
+	if prevDisplay:
+		Display = DisplayArea(root = prevDisplay.root,
+							  cursesWindow = prevDisplay.cursesWindow,
+							  gameObject = Game)
+	else:
+		Display = DisplayArea(root = root,
+							  cursesWindow = window,
+					  		  gameObject = Game)
+	Game.setDisplayArea(displayArea = Display)
+	return Game, Display
+
 def main(window):
 	root = Tk()
-	Game = TetrisGame()
-	Display = DisplayArea(root = root, cursesWindow = window, gameObject = Game)
-	Game.setDisplayArea(displayArea = Display)
+	(Game, Display) = startGame(root, window)
 	wasLoading = False
 	while (Game.alive):
-
-		if Game.loading:
+		if Game.restart:
+			root.destroy()
+			root = Tk()
+			Game, Display = startGame(root = root,
+			                          window = window)
+		elif Game.loading:
 			#window.addstr('LOADING ')
 			# Show loading screen until not loading
 			# runLoadingScreen() contains a while() running at random speed
 			# Note: Game.runLoadingScreen() contains root.update()
+			wasLoading = True
 			if not wasLoading: Display.renderEmptyScreen()
 			Display.runLoadingScreen()
-			wasLoading = True
 		else:
+			# Re-render the obstacles on the screen if loading has been cancelled
 			if wasLoading: Display.renderObstaclesOnScreen()
 			wasLoading = False
-			#window.addstr('loop ')
 			if Game.currentPiece:
-				#window.addstr('START USER IN ')
 				Game.userInput()
-				#window.addstr('START GRAVITY ')
 				Game.gravity()
 				Game.removeRows()
 			elif(Game.obstacleGroup.getMaxRow()):
@@ -40,10 +54,8 @@ def main(window):
 				print('Final Score: ', Game.score)
 				break
 			else:
-				#window.addstr('SPAWN BLOCK ')
 				Game.spawnBlock()
 				Display.renderNextPiece()
-		#window.addstr('ROOT UPDATE ')
 		root.update()
 
 curses.wrapper(main)
