@@ -6,14 +6,17 @@ import numpy as np
 import random
 import time
 from TetrisPiece import TetrisPiece
+import curses
+
+
 
 # Window placement, dimensions and properties
-def setRootProperties(root, windowHeight, windowWidth):
+def setRootProperties(root, windowHeight, windowWidth, background = 'black', title = 'Tetris Application'):
 	## Set window properties
 	# Window stays in front of other windows until closed
 	root.attributes("-topmost", True)
-	root.configure(background = 'black')
-	root.title('Tetris Application')
+	root.configure(background = background)
+	root.title(title)
 
 	# Window is not resizeable in X or Y directions
 	# https://stackoverflow.com/questions/21958534/how-can-i-prevent-a-window-from-being-resized-with-tkinter
@@ -34,7 +37,6 @@ def setRootProperties(root, windowHeight, windowWidth):
 							            windowHeight,
 							            windowX,
 							            windowY))
-
 	return root
 
 class DisplayType(Enum):
@@ -358,7 +360,58 @@ class DisplayArea:
 
 	# Dictate what happens when the restart button is pressed
 	def clickRestartButton(self):
-		if not self.game.loading: self.game.restart = True
+		if not self.game.loading:
+			# Press restart button
+			self.game.restart = True
+		else:
+			self.settingsWindow()
+
+	def storeAndQuit(self):
+		self.game.settings.difficulty = self.difficultyDisplay.get()
+		self.newWindow.destroy()
+
+	def settingsWindow(self):
+		# Input main root to create the new window
+		self.newWindow = Toplevel(self.root)
+		self.newWindow.title('Settings')
+
+		self.newWindow.geometry('{}x{}+{}+{}'.format(200,240,30,30))
+
+		self.difficultyDisplay = IntVar(self.newWindow, self.game.settings.difficulty)
+
+		# https://www.python-course.eu/tkinter_radiobuttons.php
+		Label(self.newWindow,
+		        text = """Select a Difficulty:""",
+		        justify = LEFT,
+		        padx = 20).pack(pady = 5)
+
+		# Data input for radio buttons
+		buttonData = [["Easy", self.game.settings.DIFFICULTY_EASY],
+					  ["Intermediate", self.game.settings.DIFFICULTY_INT],
+					  ["Hard", self.game.settings.DIFFICULTY_HARD]]
+
+	    # Radiobuttons
+		radioButtons = []
+		for idx in range(3):
+			radioButtons.append(Radiobutton(self.newWindow,
+											text = buttonData[idx][0],
+											indicatoron = False,
+											relief = FLAT,
+											borderwidth = 1,
+											width = 20,
+											pady = 10,
+											padx = 20,
+											variable = self.difficultyDisplay,
+											value = buttonData[idx][1]).pack(pady = 5))
+		# Save button
+		exitSettings = Button(self.newWindow,
+							  text = 'Save',
+							  width = 10,
+							  command = self.storeAndQuit).pack(pady = 10)
+
+	    # When re-opening the window, the correct radio button should be marked
+		selectedRadioButton = radioButtons[self.game.difficultyDisplay.get() - 1]
+		selectedRadioButton.select()
 
 	# Render empty screen
 	def renderEmptyScreen(self):

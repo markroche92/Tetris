@@ -1,3 +1,4 @@
+from tkinter import *
 import copy
 import time
 import math
@@ -5,6 +6,7 @@ import curses
 from DisplayArea import DisplayType
 from ObstacleGroup import ObstacleGroup
 from TetrisPiece import TetrisPiece, PieceSet
+from Settings import Settings
 import numpy as np
 
 
@@ -16,7 +18,7 @@ class TetrisGame:
     lowLevelThreshold = 3
     midLevelThreshold = 6
 
-    def __init__(self):
+    def __init__(self, settings = None):
 
         ###################################################################
         ######################## Game Parameters ##########################
@@ -28,6 +30,11 @@ class TetrisGame:
         self.alive = True
         self.loading = True
         self.restart = False
+        if settings:
+            self.settings = copy.deepcopy(settings)
+        else:
+            self.settings = Settings()
+
         self.currentPiece, self.nextPiece = None, None
         self.renderList = []
 

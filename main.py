@@ -9,9 +9,9 @@ import numpy as np
 import curses
 import sys
 
-def startGame(root, window, prevDisplay = None):
+def startGame(root, window, prevDisplay = None, settings = None):
 
-	Game = TetrisGame()
+	Game = TetrisGame(settings)
 	if prevDisplay:
 		Display = DisplayArea(root = prevDisplay.root,
 							  cursesWindow = prevDisplay.cursesWindow,
@@ -32,7 +32,8 @@ def main(window):
 			root.destroy()
 			root = Tk()
 			Game, Display = startGame(root = root,
-			                          window = window)
+			                          window = window,
+									  settings = Game.settings)
 		elif Game.loading:
 			#window.addstr('LOADING ')
 			# Show loading screen until not loading
