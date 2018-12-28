@@ -5,9 +5,11 @@ from ObstacleGroup import ObstacleGroup
 from BorderedFrame import BorderedFrame
 from DisplayArea import DisplayArea
 from TetrisGame import TetrisGame
+from Utilities import log
 import numpy as np
 import curses
 import sys
+import os
 
 def startGame(root, window, prevDisplay = None, settings = None):
 
@@ -23,6 +25,7 @@ def startGame(root, window, prevDisplay = None, settings = None):
 	Game.setDisplayArea(displayArea = Display)
 	return Game, Display
 
+@log
 def main(window):
 	root = Tk()
 	(Game, Display) = startGame(root, window)
@@ -59,6 +62,8 @@ def main(window):
 				Display.renderNextPiece()
 		root.update()
 
+
+if 'logging.txt' in os.listdir(os.getcwd()): os.remove("logging.txt")
 curses.wrapper(main)
 
 ## Actions:

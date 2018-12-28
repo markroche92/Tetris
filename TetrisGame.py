@@ -8,8 +8,7 @@ from ObstacleGroup import ObstacleGroup
 from TetrisPiece import TetrisPiece, PieceSet
 from Settings import Settings
 import numpy as np
-
-
+from Utilities import log
 
 class TetrisGame:
     # Max game level
@@ -71,31 +70,41 @@ class TetrisGame:
         self.nextPiece = TetrisPiece(pieceSet = pieceSet)
 
     # Update the position of the current piece under player control
+    @log
     def gravity(self):
-
+        # Create a copy of the current piece position, and increment column by 1 if possible
         copyPiece = copy.deepcopy(self.currentPiece)
         copyPiece.position[0] = min(self.displayArea.numberRowsTetris,
                                     copyPiece.position[0] + 1)
+        # Get sets of obstacle and current piece indices
         copyPieceIndices = set(copyPiece.getPieceGlobalIndices())
         obstacleIndices = set(self.obstacleGroup.getObstacleIndices())
 
+        # If gravity has caused the minimum row to be reached, or if gravity
+        # has caused a collision with obstacles
         if (copyPiece.getPieceMaxRow() > self.displayArea.numberRowsTetris - 1 or
             set.intersection(obstacleIndices, copyPieceIndices)):
 
+            # Fix = True - fix the position of the piece...
         	self.displayArea.renderPieceOnScreen(fix = True)
+            # Add the current piece to thee obstacle gorup
         	self.obstacleGroup.addToGroup(self.currentPiece)
+            # Need to spawn a new current piece
         	self.currentPiece = None
         else:
         	# Update the position of the block base on the action of gravity
         	# Update ROW
         	self.currentPiece.position[0] = min(self.displayArea.numberRowsTetris,
         	                                    self.currentPiece.position[0] + 1)
+            # Render the updated position of the current piece
+            # Fix = False - no need to fix piece, as still under control
         	self.displayArea.renderPieceOnScreen(fix = False)
 
         ###################################################################
         ###################################################################
 
     # Run loop where user input is processed
+    @log
     def userInput(self):
         # Measure the initial time
         timeInit = time.clock()
@@ -130,6 +139,7 @@ class TetrisGame:
                     not set.intersection(rotatedIndices, obstacleIndices)):
 
                     self.currentPiece.value = self.currentPiece.clockwiseRotation()
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
                     #break
                     #self.root.update()
@@ -144,6 +154,7 @@ class TetrisGame:
                     not set.intersection(rotatedIndices, obstacleIndices)):
                     #self.cursesWindow.addstr('GOT KEY A')
                     self.currentPiece.value = self.currentPiece.counterClockwiseRotation()
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
                     #break
                     #self.root.update()
@@ -159,6 +170,7 @@ class TetrisGame:
                     minInnerCol = min(np.where(self.currentPiece.value == 1)[1])
                     self.currentPiece.position[1] = max(-minInnerCol,
                                                 self.currentPiece.position[1] - 1)
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
                 #break
             elif (key == curses.KEY_RIGHT and
@@ -172,6 +184,7 @@ class TetrisGame:
                     #self.cursesWindow.addstr('MOVE RIGHT')
                     self.currentPiece.position[1] = min(self.displayArea.numberColsTetris,
                                                     self.currentPiece.position[1] + 1)
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
             elif (key == curses.KEY_DOWN and
             self.currentPiece.getPieceMaxRow() < self.displayArea.numberRowsTetris - 1):
@@ -184,6 +197,7 @@ class TetrisGame:
                 #self.cursesWindow.addstr('MOVE RIGHT')
                     self.currentPiece.position[0] = min(self.displayArea.numberRowsTetris,
                                             self.currentPiece.position[0] + 1)
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
 
             elif (key == curses.KEY_UP and
@@ -231,6 +245,7 @@ class TetrisGame:
                     pieceHeight = self.currentPiece.getPieceMaxRow() - self.currentPiece.getPieceMinRow() + 1
                     self.currentPiece.position[0] = min(self.displayArea.numberRowsTetris - pieceHeight,
                         self.currentPiece.position[0] + inc - 2)
+                    # Call each time a key entry detected. Therefore, screen updated with each key press
                     self.displayArea.renderPieceOnScreen(fix = False)
 
     # Remove any rows which are now complete

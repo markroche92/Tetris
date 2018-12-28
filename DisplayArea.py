@@ -7,8 +7,7 @@ import random
 import time
 from TetrisPiece import TetrisPiece
 import curses
-
-
+from Utilities import log
 
 # Window placement, dimensions and properties
 def setRootProperties(root, windowHeight, windowWidth, background = 'black', title = 'Tetris Application'):
@@ -290,7 +289,7 @@ class DisplayArea:
 
 	# Color the grid cell in the specified location
 	def colorCell(self, xCoord, yCoord, color, canvas):
-		canvas.create_rectangle(xCoord * self.gridWidth, yCoord * self.gridWidth,
+		return canvas.create_rectangle(xCoord * self.gridWidth, yCoord * self.gridWidth,
 		                                   (xCoord + 1) * self.gridWidth,
 										   (yCoord + 1) * self.gridWidth, fill = color)
 
@@ -459,13 +458,18 @@ class DisplayArea:
 			self.mainNextBlockCanvas.create_text(self.gridWidth * 3, self.gridWidth * 2, fill = "white", text = "Next Piece:", font=("Helvetica", 10))
 
 	# Function to render the piece on the screen
+	@log
 	def renderPieceOnScreen(self, fix):
 		# Reset the rendering of previous piece to black
+		import time
+		t1 = time.time()
 		if self.game.renderList:
 			for point in self.game.renderList:
 				# Point is (Row, Col), i.e. (Y, X)
-				self.colorCell(point[1], point[0], 'black', self.canvasTetris)
+				#self.colorCell(point[1], point[0], 'black', self.canvasTetris)
+				self.canvasTetris.delete(point)
 
+		t2 = time.time()
 		# Render the block's new position
 		self.game.renderList = []
 		(offsetRows, offsetCols) = self.game.currentPiece.position
@@ -474,13 +478,25 @@ class DisplayArea:
 				if value == 1:
 					# Remember that we are rendering these indices of the grid
 					if not fix:
-						self.game.renderList.append((offsetRows + idxRow, offsetCols + idxCol))
-					self.colorCell(offsetCols + idxCol, offsetRows + idxRow,
-					               self.game.currentPiece.colour, self.canvasTetris)
+						# If not fixing to the obstacle group
+						self.game.renderList.append(self.colorCell(offsetCols + idxCol,
+																   offsetRows + idxRow,
+						               							   self.game.currentPiece.colour,
+																   self.canvasTetris))
+						#self.game.renderList.append((offsetRows + idxRow, offsetCols + idxCol))
+					else:
+						self.colorCell(offsetCols + idxCol, offsetRows + idxRow,
+						               self.game.currentPiece.colour, self.canvasTetris)
+
+		t3 = time.time()
 		# Update the canvas each time the piece position changes
 		self.root.update()
+		t4 = time.time()
+
+		print('Times: {}, {}, {}', t2 - t1, t3 - t2, t4 - t3)
 
 	# Render the fixed objects on the screen
+	@log
 	def renderObstaclesOnScreen(self):
 		# Once rows have been removed, render the obstacles on the screen
 

@@ -140,9 +140,6 @@ class TetrisPiece:
 			self.pieceList = {**self.tetraminos, **self.pentaminos, **self.sextaminos}
 			self.pieceColours = self.allColours
 
-
-
-
 		if pieceValue is not None:
 			self.value = pieceValue
 		elif pieceName and pieceName in self.pieceList.keys():

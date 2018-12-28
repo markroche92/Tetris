@@ -1,4 +1,5 @@
 import numpy as np
+from Utilities import log
 
 # Class for the group of tetris blocks which are fixed at bottom of play area
 class ObstacleGroup:
@@ -8,6 +9,7 @@ class ObstacleGroup:
 		self.value = [[{False : ''} for col in range(width)] for row in range(height)]
 
 	# Add piece coordinates to the obstacle array
+	@log
 	def addToGroup(self, piece):
 		(offsetRow, offsetCol) = piece.position
 		for idxPieceRow, pieceRow in enumerate(piece.value):
