@@ -42,13 +42,18 @@ def main(window):
 			# Show loading screen until not loading
 			# runLoadingScreen() contains a while() running at random speed
 			# Note: Game.runLoadingScreen() contains root.update()
+
+			# Change the colour of obstacles, current piece and next piece to black
+			if not wasLoading: Display.hideTetris(), Display.hideNextPiece(retain = True)
 			wasLoading = True
-			if not wasLoading: Display.renderEmptyScreen()
+
+			# Run while loop, displaying loading screen
 			Display.runLoadingScreen()
 		else:
 			# Re-render the obstacles on the screen if loading has been cancelled
-			if wasLoading: Display.renderObstaclesOnScreen()
+			if wasLoading: Display.renderObstaclesOnScreen(), Display.restoreNextPiece()
 			wasLoading = False
+
 			if Game.currentPiece:
 				Game.userInput()
 				Game.gravity()

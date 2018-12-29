@@ -13,7 +13,7 @@ from Utilities import log
 class TetrisGame:
     # Max game level
     MAX_LEVEL =  1000
-    MAX_SCORE = MAX_LEVEL * 100
+    MAX_SCORE = MAX_LEVEL * 1000
     lowLevelThreshold = 3
     midLevelThreshold = 6
 
@@ -36,6 +36,7 @@ class TetrisGame:
 
         self.currentPiece, self.nextPiece = None, None
         self.renderList = []
+        self.renderListNext = []
 
     def setDisplayArea(self, displayArea):
 
@@ -86,11 +87,12 @@ class TetrisGame:
             set.intersection(obstacleIndices, copyPieceIndices)):
 
             # Fix = True - fix the position of the piece...
-        	self.displayArea.renderPieceOnScreen(fix = True)
+            fixRectangleList = self.displayArea.renderPieceOnScreen(fix = True)
+
             # Add the current piece to thee obstacle gorup
-        	self.obstacleGroup.addToGroup(self.currentPiece)
+            self.obstacleGroup.addToGroup(self.currentPiece, fixRectangleList)
             # Need to spawn a new current piece
-        	self.currentPiece = None
+            self.currentPiece = None
         else:
         	# Update the position of the block base on the action of gravity
         	# Update ROW
@@ -251,11 +253,18 @@ class TetrisGame:
     # Remove any rows which are now complete
     def removeRows(self):
         doRemove = False
-        countRowsRemoved = sum([1 if self.obstacleGroup.checkRow(idx) else 0 for idx, row in enumerate(self.obstacleGroup.value)])
+        # Count the number of rows to be removed
+        countRowsRemoved = sum([1 if self.obstacleGroup.checkRow(idx) else 0
+                                for idx, row in enumerate(self.obstacleGroup.value)])
+        # Score increase is poroportional to square of number of rows to remove
         bonus = countRowsRemoved * countRowsRemoved * 100
+
+        if countRowsRemoved > 0: self.displayArea.hideTetris(remove = True)
+
         for idxRow in range(self.displayArea.numberRowsTetris):
             if self.obstacleGroup.checkRow(idxRow):
                 doRemove = True
+
                 self.obstacleGroup.removeRow(idxRow)
                 self.score = self.score + math.floor(bonus / countRowsRemoved)
                 self.displayArea.updateDisplay(self.score, DisplayType.SCORE)
@@ -263,6 +272,5 @@ class TetrisGame:
                     # Increment the level each time the scoroe
                     levelPrev = copy.deepcopy(self.level)
                     self.level = math.floor(self.score / 1000)
-
                     if levelPrev != self.level: self.displayArea.updateDisplay(self.level, DisplayType.LEVEL)
-                if doRemove: self.displayArea.renderObstaclesOnScreen()
+        if doRemove: self.displayArea.renderObstaclesOnScreen()
