@@ -1,8 +1,11 @@
 from tkinter import *
 import copy
 import time
+import datetime
 import math
 import curses
+import pickle
+import os
 from DisplayArea import DisplayType
 from ObstacleGroup import ObstacleGroup
 from TetrisPiece import TetrisPiece, PieceSet
@@ -16,6 +19,7 @@ class TetrisGame:
     MAX_SCORE = MAX_LEVEL * 1000
     lowLevelThreshold = 3
     midLevelThreshold = 6
+    pickleName = 'leaderboard.pickle'
 
     def __init__(self, settings = None):
 
@@ -29,6 +33,8 @@ class TetrisGame:
         self.alive = True
         self.loading = True
         self.restart = False
+        self.playerName = ''
+        self.loadedData = None
         if settings:
             self.settings = copy.deepcopy(settings)
         else:
@@ -37,6 +43,39 @@ class TetrisGame:
         self.currentPiece, self.nextPiece = None, None
         self.renderList = []
         self.renderListNext = []
+
+    # Load past game data from pickle file
+    def loadData(self):
+        # Pickle is present, load it
+        openedFile = open(self.pickleName, 'rb')
+        # Decode information
+        self.loadedData = pickle.load(openedFile, encoding='bytes')
+        # Close file
+        openedFile.close()
+
+    # Check if pickle file exists
+    def pickleExists(self):
+        return self.pickleName in os.listdir(os.getcwd())
+
+    # Save player name, score and time to .pickle
+    def saveData(self):
+        # Player name, score, date and time recorded
+        newData = (self.playerName, self.score,
+                   self.settings.difficulty, datetime.datetime.now())
+        # Load in previous record
+        if self.pickleName in os.listdir(os.getcwd()):
+            # Load data
+            self.loadData()
+            # Add the data to list
+            self.loadedData.append(newData)
+        else:
+            # Create a pickle
+            self.loadedData = [newData]
+
+        # Save the pickle
+        outFile = open(self.pickleName,'wb')
+        pickle.dump(self.loadedData, outFile)
+        outFile.close()
 
     def setDisplayArea(self, displayArea):
 

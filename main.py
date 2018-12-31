@@ -61,6 +61,7 @@ def main(window):
 			elif(Game.obstacleGroup.getMaxRow()):
 				print('GAME OVER!')
 				print('Final Score: ', Game.score)
+				Game.saveData()
 				break
 			else:
 				Game.spawnBlock()

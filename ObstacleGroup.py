@@ -47,8 +47,6 @@ class ObstacleGroup:
 				# Set each row equal to the previous row that existed
 				self.value[idxRow] = self.value[idxRow - 1]
 
-
-
 	# Get the indices of the tetris matrix which are occupied by fixed blocks
 	def getObstacleIndices(self):
 		# Indices are returned as (row, col)
