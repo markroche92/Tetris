@@ -535,7 +535,7 @@ class DisplayArea:
     	startFrame = Frame(rightFrame, bg = 'black', height = totH,
     					   width = self.windowWidth - self.tetrisWidth - 6 * self.gridWidth)
 
-    		# Restart / Settings button
+    	# Restart / Settings button
     	self.settingsRestartStr = StringVar()
     	self.settingsRestartStr.set('Settings')
     	self.restartButton = Button(startFrame,

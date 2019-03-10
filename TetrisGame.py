@@ -41,6 +41,7 @@ class TetrisGame:
             self.settings = Settings()
 
         self.currentPiece, self.nextPiece = None, None
+        self.paused = False # Flag goes True if pausing mid-game
         self.renderList = []
         self.renderListNext = []
 

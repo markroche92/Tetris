@@ -29,9 +29,10 @@ def startGame(root, window, prevDisplay = None, settings = None):
 def main(window):
 	root = Tk()
 	(Game, Display) = startGame(root, window)
-	wasLoading = False
+	wasLoading, wasRunning = False, False
 	while (Game.alive):
 		if Game.restart:
+			wasRunning, wasLoading = False, False
 			root.destroy()
 			root = Tk()
 			Game, Display = startGame(root = root,
@@ -45,14 +46,23 @@ def main(window):
 
 			# Change the colour of obstacles, current piece and next piece to black
 			if not wasLoading: Display.hideTetris(), Display.hideNextPiece(retain = True)
-			wasLoading = True
+			if wasRunning and not wasLoading:
+				Game.paused = True
+				#Display.restartButton.config(state = DISABLED)
+				Display.startString.set("Resume")
+			wasRunning, wasLoading = False, True
+
 
 			# Run while loop, displaying loading screen
 			Display.runLoadingScreen()
 		else:
 			# Re-render the obstacles on the screen if loading has been cancelled
 			if wasLoading: Display.renderObstaclesOnScreen(), Display.restoreNextPiece()
-			wasLoading = False
+			if wasLoading and not wasRunning:
+				Game.paused = True
+				#Display.restartButton.config(state = NORMAL)
+				Display.startString.set("Pause")
+			wasRunning, wasLoading = True, False
 
 			if Game.currentPiece:
 				Game.userInput()
